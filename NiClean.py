@@ -556,12 +556,12 @@ class NiCleanApp(ctk.CTk):
             return desired
 
         stem, suffix, parent = desired.stem, desired.suffix, desired.parent
-        i = 1
+        ni = 1
         while True:
-            candidate = parent / f"{stem}_{i}{suffix}"
+            candidate = parent / f"{stem}_{ni}{suffix}"
             if not candidate.exists():
                 return candidate
-            i += 1
+            ni += 1
     
     def process_logic(self, settings: Settings) -> None:
         # 1) Gather media files
