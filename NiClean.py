@@ -20,6 +20,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
+from path_safety import unique_destination
 
 import customtkinter as ctk
 from tkinter import messagebox, filedialog
@@ -549,20 +550,11 @@ class NiCleanApp(ctk.CTk):
         self.after(0, lambda: self.run_btn.configure(state="normal"))
 
     def _unique_dest_in_dir(self, desired: Path, original: Path) -> Path:
-        """If desired exists and isn't the same as original, suffix _1, _2, ..."""
-        if desired.resolve() == original.resolve():
-            return desired
-        if not desired.exists():
-            return desired
+        """Choose an available path without overwriting existing files."""
+        return unique_destination(
+            desired, original, allow_original=False
+        )
 
-        stem, suffix, parent = desired.stem, desired.suffix, desired.parent
-        ni = 1
-        while True:
-            candidate = parent / f"{stem}_{ni}{suffix}"
-            if not candidate.exists():
-                return candidate
-            ni += 1
-    
     def process_logic(self, settings: Settings) -> None:
         # 1) Gather media files
         def is_media(p: Path) -> bool:
@@ -646,6 +638,7 @@ class NiCleanApp(ctk.CTk):
                 else:
                     dest_dir = out_root
                 dest = dest_dir / new_name
+                dest = self._unique_dest_in_dir(dest, src)
 
             try:
                 # Optional: log BEFORE metadata for this file
